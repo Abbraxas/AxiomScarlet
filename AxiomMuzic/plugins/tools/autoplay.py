@@ -125,7 +125,7 @@ async def autoplay_command(_, message: Message, __):
     else: status = await is_autoplay(chat_id)
     lang = await get_autoplay_lang(chat_id)
     mood = await get_autoplay_mood(chat_id)
-    await message.reply_text(autoplay_text(status, lang, mood), reply_markup=autoplay_markup(status), disable_web_page_preview=True)
+    await message.reply_text(autoplay_text(status, lang, mood), reply_markup=autoplay_markup(status))
 
 @app.on_callback_query(filters.regex(r"^autoplay_toggle\|(on|off)$") & ~BANNED_USERS)
 @ActualAdminCB

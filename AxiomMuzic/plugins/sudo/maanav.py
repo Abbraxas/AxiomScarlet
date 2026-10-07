@@ -137,19 +137,20 @@ async def restriction_app(app :app, message):
                 await message.reply("hnnji le liya admin !")
 
 
-#async def your_function():
-    for fullpromoted in data:
-        print(f"present {fullpromoted}")            
-        if fullpromoted in fullpromote:
-            await app.promote_chat_member(chat_id, user_id, privileges=ChatPrivileges(
-                can_change_info=True,
-                can_invite_users=True,
-                can_delete_messages=True,
-                can_restrict_members=True,
-                can_pin_messages=True,
-                can_promote_members=True,
-                can_manage_chat=True,
-                can_manage_video_chats=True,
-               )
-             )
-            await message.reply("omkk full power se admin bna diya !")
+        for fullpromoted in data:
+            if fullpromoted in fullpromote:
+                await app.promote_chat_member(
+                    chat_id, 
+                    user_id, 
+                    privileges=ChatPrivileges(
+                        can_change_info=True,
+                        can_invite_users=True,
+                        can_delete_messages=True,
+                        can_restrict_members=True,
+                        can_pin_messages=True,
+                        can_promote_members=True,
+                        can_manage_chat=True,
+                        can_manage_video_chats=True,
+                    )
+                )
+                await message.reply("omkk full power se admin bna diya !")

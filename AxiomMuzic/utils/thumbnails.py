@@ -223,7 +223,14 @@ async def get_thumb(videoid: str, progress_percent: int = 0, use_cache: bool = T
         return YOUTUBE_IMG_URL
     try:
         # BACKGROUND
-        base = Image.open(thumb_path).convert("RGBA")
+        try:
+            with Image.open(thumb_path) as img:
+                img.verify()
+            with Image.open(thumb_path) as img:
+                base = img.convert("RGBA")
+        except Exception as exc:
+            print(f"Invalid thumbnail image: {exc}")
+            return YOUTUBE_IMG_URL
         base = base.resize((1280, 720), Image.LANCZOS)
         base = ImageEnhance.Brightness(base).enhance(1.1)
         bg = base.filter(ImageFilter.GaussianBlur(50))

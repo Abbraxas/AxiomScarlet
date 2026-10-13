@@ -14,9 +14,7 @@ async def get_thumb(
         os.makedirs("cache", exist_ok=True)
 
         thumb_path = f"cache/thumb_{videoid}.jpg"
-        thumbnail_url = (
-            f"https://img.youtube.com/vi/{videoid}/hqdefault.jpg"
-        )
+        thumbnail_url = f"https://img.youtube.com/vi/{videoid}/maxresdefault.jpg"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(

@@ -35,6 +35,12 @@ IS_BROADCASTING = False
 @language
 async def braodcast_message(client, message, _):
     global IS_BROADCASTING
+
+    if IS_BROADCASTING:
+        return await message.reply_text(
+            "A broadcast is already running. Please wait."
+        )
+
     if message.reply_to_message:
         x = message.reply_to_message.id
         y = message.chat.id
@@ -58,7 +64,7 @@ async def braodcast_message(client, message, _):
     IS_BROADCASTING = True
     await message.reply_text(_["broad_1"])
 
-    if "-nobot" not in message.text:
+    if "-nobot" not in (message.text or ""):
         sent = 0
         pin = 0
         chats = []

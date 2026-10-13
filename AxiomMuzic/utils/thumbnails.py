@@ -1,67 +1,47 @@
 import os
-from io import BytesIO
-
 import aiohttp
-from PIL import Image
-
+from youtubesearchpython import VideosSearch
 from config import YOUTUBE_IMG_URL
 
-_SOURCES = ("maxresdefault", "sddefault", "hqdefault", "mqdefault")
-_MIN_WIDTH = 300
-_BAR_LIMIT = 24
 
-
-def _trim_bars(image):
-    width, height = image.size
-    bar = int(height * 0.125)
-    if bar < 1:
-        return image, False
-    top = image.crop((0, 0, width, bar)).convert("L").getextrema()[1]
-    bottom = image.crop((0, height - bar, width, height)).convert("L").getextrema()[1]
-    if top < _BAR_LIMIT and bottom < _BAR_LIMIT:
-        return image.crop((0, bar, width, height - bar)), True
-    return image, False
-
-
-async def _fetch(session, videoid, name):
-    url = f"https://i.ytimg.com/vi/{videoid}/{name}.jpg"
-    try:
-        async with session.get(url) as resp:
-            if resp.status != 200:
-                return None
-            raw = await resp.read()
-    except Exception:
-        return None
-    try:
-        image = Image.open(BytesIO(raw))
-        image.load()
-    except Exception:
-        return None
-    if image.width < _MIN_WIDTH:
-        return None
-    return raw, image
-
-
-async def get_thumb(videoid):
-    path = f"cache/{videoid}.jpg"
-    if os.path.isfile(path) and os.path.getsize(path) > 0:
-        return path
+async def get_thumb(
+    videoid,
+    progress_percent=0,
+    use_cache=True,
+    user_name="AxiomUser",
+):
     try:
         os.makedirs("cache", exist_ok=True)
-        timeout = aiohttp.ClientTimeout(total=10)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            for name in _SOURCES:
-                got = await _fetch(session, videoid, name)
-                if not got:
-                    continue
-                raw, image = got
-                image, trimmed = _trim_bars(image)
-                if trimmed:
-                    image.convert("RGB").save(path, "JPEG", quality=95)
-                else:
-                    with open(path, "wb") as f:
-                        f.write(raw)
-                return path
-    except Exception:
-        pass
-    return YOUTUBE_IMG_URL
+
+        thumb_path = f"cache/thumb_{videoid}.jpg"
+        thumbnail_url = (
+            f"https://img.youtube.com/vi/{videoid}/hqdefault.jpg"
+        )
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                thumbnail_url,
+                timeout=aiohttp.ClientTimeout(total=20),
+            ) as response:
+                if response.status != 200:
+                    return YOUTUBE_IMG_URL
+
+                content_type = response.headers.get(
+                    "Content-Type", ""
+                )
+                if not content_type.startswith("image/"):
+                    return YOUTUBE_IMG_URL
+
+                image_data = await response.read()
+
+                if not image_data:
+                    return YOUTUBE_IMG_URL
+
+                with open(thumb_path, "wb") as file:
+                    file.write(image_data)
+
+        return thumb_path
+
+    except Exception as e:
+        print(f"Thumbnail error: {e}")
+        return YOUTUBE_IMG_URL
